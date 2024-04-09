@@ -34,3 +34,7 @@ body {
 .fc-license-message {
   display: none;
 }
+
+.fc .fc-non-business {
+  background-color: rgba(173, 23, 223, 0.561) !important;
+}

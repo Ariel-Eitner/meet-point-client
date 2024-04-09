@@ -12,7 +12,6 @@ export const MainNavbar = () => {
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between">
           <div className="flex space-x-4">
-            {/* Logo */}
             <div>
               <a
                 href="/"
@@ -21,12 +20,9 @@ export const MainNavbar = () => {
                 <span className="font-bold">Meet Point</span>
               </a>
             </div>
-            {/* Primary Nav Items */}
-            <div className="hidden md:flex items-center space-x-1">
-              {/* Add your navigation items here */}
-            </div>
+
+            <div className="hidden md:flex items-center space-x-1"></div>
           </div>
-          {/* Secondary Nav Items */}
           <div className="hidden md:flex items-center space-x-1">
             {user ? (
               <>
