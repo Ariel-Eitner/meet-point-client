@@ -19,7 +19,7 @@ export default function ProtectRoute() {
             // Redirige basado en el rol del usuario
             switch (role) {
               case "professional":
-                router.push("/home/professional");
+                router.push("/home/calendar");
                 break;
               case "client":
                 router.push("/home/client");
