@@ -1,6 +1,6 @@
-import axios from "axios";
 import { API_URL } from "@/utils/utils";
 import { Appointment } from "@/interfaces";
+import axios from "axios";
 const baseUrl = `${API_URL}/appointments`;
 
 export const appointmentService = {
