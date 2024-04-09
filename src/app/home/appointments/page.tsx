@@ -6,7 +6,7 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 import { appointmentService } from "@/services/appointmentService";
 import { CalendarEvent } from "@/interfaces";
 import { format } from "date-fns";
-import es from "date-fns/locale/es";
+import { es } from "date-fns/locale";
 
 export default function AppointmentsPage() {
   const { user } = useUser();
