@@ -12,7 +12,7 @@ export default function ClientPage() {
       .then((response) => {
         // Filtra solo a los usuarios con rol 'professional'
         const professionals = response.data.filter(
-          (user) => user.role === "professional"
+          (user: any) => user.role === "professional"
         );
         setUsers(professionals);
       })
@@ -26,7 +26,7 @@ export default function ClientPage() {
       </h2>
       {users.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {users.map((user) => (
+          {users.map((user: any) => (
             <Link
               className="bg-white shadow-md rounded-lg p-4 block"
               href={`/home/client/professional/${user._id}`}

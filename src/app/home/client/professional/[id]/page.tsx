@@ -5,9 +5,9 @@ import { userService } from "@/services/userService";
 import { useParams } from "next/navigation";
 
 export default function ProfessionalPage() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
 
-  const { id } = useParams();
+  const id = useParams().id as string;
 
   useEffect(() => {
     if (id) {
