@@ -32,10 +32,10 @@ export default function ProtectRoute() {
           })
           .catch((error) => {
             console.error("Error buscando al usuario", error);
-            router.push("/");
+            router.push("/create");
           });
       } else {
-        router.push("/");
+        router.push("/create");
       }
     }
   }, [user, isLoading, router]);
