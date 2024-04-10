@@ -25,10 +25,8 @@ export default function ProtectRoute() {
                 router.push("/home/client");
                 break;
               default:
-                console.log(
-                  "Rol no reconocido, redirigiendo a la página principal..."
-                );
-                router.push("/"); // O cualquier página por defecto para roles no manejados
+                console.log("no hay rol, llevando a crear usuario");
+                router.push("/create"); // O cualquier página por defecto para roles no manejados
                 break;
             }
           })
