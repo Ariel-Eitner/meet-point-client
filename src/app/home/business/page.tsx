@@ -58,13 +58,23 @@ export default function BusinessHours() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userResponse = await userService.findByEmail(user?.email);
-        const userId = userResponse.data.user._id;
-        console.log(userId);
+        // Asegúrate de que user.email existe y es un string antes de llamar a findByEmail
+        if (!user?.email) {
+          throw new Error("Email is required");
+        }
+
+        const userResponse = await userService.findByEmail(user.email);
+        // Asegura la existencia de users[0] antes de acceder a sus propiedades
+        const userData = userResponse.data.users[0];
+        if (!userData) {
+          throw new Error("User not found");
+        }
+        const userId = userData._id;
         setUserId(userId);
 
         const businessHourResponse =
           await businessHoursService.findByProfessionalId(userId);
+        // Asegúrate de que businessHourResponse.data existe antes de asignar valores
         if (businessHourResponse.data) {
           setStartTime(businessHourResponse.data.startTime);
           setEndTime(businessHourResponse.data.endTime);

@@ -70,10 +70,15 @@ export default function Calendar() {
   };
 
   const fetchData = async () => {
+    if (!user?.email) {
+      return;
+    }
+
     try {
-      const userResponse = await userService.findByEmail(user?.email);
-      const userId = userResponse.data.user._id;
+      const userResponse = await userService.findByEmail(user.email);
+      const userId = userResponse.data.users[0]._id;
       setUserId(userId);
+
       const businessHourResponse =
         await businessHoursService.findByProfessionalId(userId);
       if (businessHourResponse.data) {

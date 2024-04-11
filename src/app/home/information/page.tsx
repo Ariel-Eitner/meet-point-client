@@ -1,39 +1,42 @@
 "use client";
-import { professionalInfoService } from "@/services/professionalInfoService";
+import { userService } from "@/services/userService";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import React, { useEffect, useState } from "react";
 
 export default function InformationPage() {
-  // Definir el estado inicial para almacenar los datos del formulario
+  const { user, isLoading } = useUser();
+
   const [formData, setFormData] = useState<any>({
-    _id: "",
     field: "",
+    phoneNumber: "",
     specialty: "",
     experience: "",
     studies: "",
     licenseNumber: "",
-    linkedin: "",
-    facebook: "",
-    github: "",
-    portfolio: "",
-    biography: "",
+    linkedInUrl: "",
+    facebookUrl: "",
+    githubUrl: "",
+    websiteUrl: "",
+    bio: "",
   });
-  const userId = "66156fe98b1a0027d5565891"; // Este valor debe obtenerse dinámicamente
+
+  const [userId, setUserId] = useState<string>("");
 
   useEffect(() => {
-    professionalInfoService
-      .findOneByUserId(userId) // Cambia aquí para usar el nuevo método
-      .then((response) => {
-        const data = response.data.professionalInfo; // Ajusta según la estructura de tu respuesta
-        console.log(data, " de aca");
-        // No es necesario verificar si data.length > 0, ya que se espera un objeto, no un array
-        setFormData(data);
-      })
-      .catch((error) =>
-        console.error("Error loading professional information", error)
-      );
-  }, [userId]); // Asume que `userId` es una dependencia de este efecto
+    if (user?.email) {
+      userService
+        .findByEmail(user.email)
+        .then((response: any) => {
+          console.log(response.data);
+          setFormData({ ...response.data.users[0] });
+          setUserId(response.data.users[0]._id);
+        })
+        .catch((error) =>
+          console.error("Error loading professional information", error)
+        );
+    }
+  }, [user]);
 
-  // Manejar el cambio en los campos del formulario
   const handleChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prevState: any) => ({
@@ -42,21 +45,15 @@ export default function InformationPage() {
     }));
   };
 
-  // Manejar el envío del formulario
   const handleSubmit = (e: any) => {
     e.preventDefault();
 
-    // Asumiendo que formData incluye un campo `_id` si se está editando un registro existente.
-    const operation = formData._id
-      ? professionalInfoService.update(formData._id, { ...formData, userId })
-      : professionalInfoService.create({ ...formData, userId });
+    const operation = userService.updateUser(userId, formData);
 
     operation
       .then((response) => {
         alert("Professional information saved successfully");
         console.log(response.data);
-        // Actualiza el estado con la información recién creada/actualizada para incluir el _id, etc.
-        setFormData(response.data.data);
       })
       .catch((error) => {
         console.error("Failed to save professional information", error);
@@ -78,15 +75,16 @@ export default function InformationPage() {
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="rounded-md shadow-sm -space-y-px">
             {[
-              { id: "field", label: "Rubro", type: "text" },
+              { id: "field", label: "Rubro/Industria", type: "text" },
               { id: "specialty", label: "Especialidad", type: "text" },
               { id: "experience", label: "Años de Experiencia", type: "text" },
               { id: "studies", label: "Estudios", type: "text" },
               { id: "licenseNumber", label: "Matrícula", type: "text" },
-              { id: "linkedin", label: "LinkedIn", type: "url" },
-              { id: "facebook", label: "Facebook", type: "url" },
-              { id: "github", label: "GitHub", type: "url" },
-              { id: "portfolio", label: "Portafolio", type: "url" },
+              { id: "linkedInUrl", label: "LinkedIn", type: "url" },
+              { id: "facebookUrl", label: "Facebook", type: "url" },
+              { id: "githubUrl", label: "GitHub", type: "url" },
+              { id: "phoneNumber", label: "Numero personal", type: "text" },
+              { id: "websiteUrl", label: "Portafolio/Página Web", type: "url" },
             ].map((input) => (
               <div key={input.id} className="py-2">
                 <label htmlFor={input.id} className="sr-only">
@@ -96,7 +94,7 @@ export default function InformationPage() {
                   type={input.type}
                   name={input.id}
                   id={input.id}
-                  value={formData[input.id]}
+                  value={formData?.[input.id] || ""}
                   onChange={handleChange}
                   className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                   placeholder={input.label}
@@ -104,13 +102,13 @@ export default function InformationPage() {
               </div>
             ))}
             <div className="py-2">
-              <label htmlFor="biography" className="sr-only">
+              <label htmlFor="bio" className="sr-only">
                 Biografía / Más Información
               </label>
               <textarea
-                name="biography"
-                id="biography"
-                defaultValue={formData.biography}
+                name="bio"
+                id="bio"
+                defaultValue={formData?.bio}
                 onChange={handleChange}
                 rows={4}
                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"

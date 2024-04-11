@@ -8,15 +8,12 @@ export default function ProtectRoute() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading) {
-      if (user) {
-        userService
-          .findByEmail(user.email)
-          .then((response) => {
-            // Asume que la respuesta incluye el rol del usuario en response.data.user.role
-            const role = response.data.user.role;
-
-            // Redirige basado en el rol del usuario
+    if (!isLoading && user?.email) {
+      userService
+        .findByEmail(user?.email)
+        .then((response: any) => {
+          if (response.data.users.length > 0) {
+            const role = response.data.users[0].role;
             switch (role) {
               case "professional":
                 router.push("/home/calendar");
@@ -26,17 +23,18 @@ export default function ProtectRoute() {
                 break;
               default:
                 console.log("no hay rol, llevando a crear usuario");
-                router.push("/create"); // O cualquier página por defecto para roles no manejados
+                router.push("/create");
                 break;
             }
-          })
-          .catch((error) => {
-            console.error("Error buscando al usuario", error);
+          } else {
+            console.log("Usuario no encontrado, llevando a crear usuario");
             router.push("/create");
-          });
-      } else {
-        router.push("/create");
-      }
+          }
+        })
+        .catch((error) => {
+          console.error("Error realizando la búsqueda del usuario", error);
+          router.push("/create");
+        });
     }
   }, [user, isLoading, router]);
 

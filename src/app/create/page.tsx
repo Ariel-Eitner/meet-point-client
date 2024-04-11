@@ -6,7 +6,6 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 export default function CreateUser() {
   const { createUserForm, handleChange, handleSubmit } = useCreateUser();
   const { user, error, isLoading } = useUser();
-  console.log(user);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-green-400 via-blue-500 to-gray-600">
@@ -21,16 +20,38 @@ export default function CreateUser() {
           <p className="mt-2 text-gray-600">Completa tus datos</p>
         </div>
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <label htmlFor="name" className=" text-black">
-            Nombre Completo <span className="text-red-500">*</span>
+          <label htmlFor="firstName" className=" text-black">
+            Primer Nombre <span className="text-red-500">*</span>
             <input
               type="text"
-              name="name"
-              placeholder="Nombre Completo"
+              name="firstName"
+              placeholder="Primer Nombre"
               onChange={handleChange}
-              value={user?.given_name + " " + user?.family_name}
+              defaultValue={(user?.given_name || "") as string}
               required
-              disabled
+              className="appearance-none rounded-none relative block w-full px-3 mb-5 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+            />
+          </label>
+          <label htmlFor="middleName" className=" text-black">
+            Segundo Nombre
+            <input
+              type="text"
+              name="middleName"
+              placeholder="Segundo Nombre"
+              onChange={handleChange}
+              defaultValue={""}
+              className="appearance-none rounded-none relative block w-full px-3 mb-5 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+            />
+          </label>
+          <label htmlFor="lastName" className=" text-black">
+            Apellido <span className="text-red-500">*</span>
+            <input
+              type="text"
+              name="lastName"
+              placeholder="Apellido"
+              onChange={handleChange}
+              defaultValue={(user?.family_name || "") as string}
+              required
               className="appearance-none rounded-none relative block w-full px-3 mb-5 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
             />
           </label>

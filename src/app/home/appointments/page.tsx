@@ -14,24 +14,31 @@ export default function AppointmentsPage() {
   const [citas, setCitas] = useState<CalendarEvent[] | any>([]);
 
   useEffect(() => {
-    // Fetch del ID del usuario
     const fetchUser = async () => {
+      if (!user?.email) {
+        console.error("No user email found, skipping fetch");
+        return;
+      }
+
       try {
-        const userResponse = await userService.findByEmail(user?.email);
-        const userId = userResponse.data.user._id;
-        setUserId(userId);
+        const userResponse = await userService.findByEmail(user.email);
+        if (userResponse.data && userResponse.data.users.length > 0) {
+          const userId = userResponse.data.users[0]._id;
+          setUserId(userId);
+        } else {
+          console.error("No user found with given email");
+        }
       } catch (error) {
         console.error("Error al buscar los datos del usuario:", error);
       }
     };
 
-    fetchUser();
-  }, []); // Dependencias vacías para que se ejecute solo al montar el componente
+    if (user?.email) fetchUser();
+  }, [user?.email]);
 
   useEffect(() => {
-    // Fetch de las citas del usuario
     const fetchAppointmentsByUser = async () => {
-      if (!userId) return; // No hacer nada si userId no está establecido
+      if (!userId) return;
       try {
         const response = await appointmentService.findAllByUser(userId);
         const citasTransformadas = response.data.map(

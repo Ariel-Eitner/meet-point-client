@@ -12,17 +12,22 @@ export default function SideBar() {
 
   useEffect(() => {
     const fetchUser = async () => {
+      if (!user?.email) {
+        return;
+      }
+
       try {
-        const userResponse = await userService.findByEmail(user?.email);
-        // const userId = userResponse.data.user._id;
-        const role = userResponse.data.user.role;
-        console.log(role);
-        setUserRole(role);
+        const userResponse = await userService.findByEmail(user.email);
+        if (userResponse.data.users && userResponse.data.users[0].role) {
+          const role = userResponse.data.users[0].role;
+          setUserRole(role);
+        } else {
+          return;
+        }
       } catch (error) {
         console.error("Error al buscar los datos del usuario:", error);
       }
     };
-
     fetchUser();
   }, [user]);
 

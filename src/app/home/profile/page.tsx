@@ -2,7 +2,7 @@ import React from "react";
 
 export default function Profile() {
   return (
-    <div className="bg-gray-500">
+    <div className="bg-gray-500 h-screen">
       <a
         href="/api/auth/logout"
         className="font-semibold text-gray-900 cursor-pointer"

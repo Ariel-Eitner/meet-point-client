@@ -1,10 +1,57 @@
+// export interface CreateUser {
+//   name: string;
+//   email: string;
+//   // password: string;
+//   phoneNumber?: string;
+//   country?: string;
+//   role: "professional" | "client" | "admin";
+// }
 export interface CreateUser {
-  name: string;
-  email: string;
-  // password: string;
-  phoneNumber?: string;
+  address?: string;
+  bio?: string;
+  birthDate?: Date;
+  company?: string;
   country?: string;
-  role: "professional" | "client" | "admin";
+  createdAt?: Date;
+  cuit?: string;
+  dni?: string;
+  driverLicenseNumber?: string;
+  email?: string;
+  employmentStatus?: string;
+  experience?: string;
+  facebookId?: string;
+  facebookUrl?: string;
+  field?: string;
+  firstName?: string;
+  gender?: string;
+  githubId?: string;
+  githubUrl?: string;
+  googleId?: string;
+  industry?: string;
+  instagramHandle?: string;
+  isActive?: boolean;
+  language?: string;
+  lastName?: string;
+  licenseNumber?: string;
+  linkedinId?: string;
+  linkedInUrl?: string;
+  maritalStatus?: string;
+  microsoftId?: string;
+  middleName?: string;
+  nationality?: string;
+  occupation?: string;
+  passportNumber?: string;
+  password?: string;
+  phoneNumber?: string;
+  refreshToken?: string;
+  resetPasswordExpires?: Date;
+  resetPasswordToken?: string;
+  role?: string;
+  ssn?: string;
+  taxId?: string;
+  twitterHandle?: string;
+  updatedAt?: Date;
+  websiteUrl?: string;
 }
 
 export interface User {

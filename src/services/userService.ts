@@ -24,7 +24,7 @@ export const userService = {
   deleteUser(id: string) {
     return axios.delete(`${baseUrl}/${id}`);
   },
-  findByEmail(email: string | null | undefined) {
-    return axios.get(`${baseUrl}/email/${email}`);
+  findByEmail(email: string) {
+    return axios.get(`${baseUrl}/search`, { params: { email } });
   },
 };
