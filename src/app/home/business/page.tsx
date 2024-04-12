@@ -3,8 +3,11 @@ import { BusinessHour } from "@/interfaces";
 import { businessHoursService } from "@/services/businessHoursService";
 import React, { useEffect, useState } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { userService } from "@/services/userService";
+
 import { useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
+
+import { setBusinessHours } from "@/app/lib/features/businessHours/businessHoursSlice";
 
 const diasSemana = [
   "Domingo",
@@ -17,15 +20,20 @@ const diasSemana = [
 ];
 
 export default function BusinessHours() {
+  const dispatch = useAppDispatch();
+  const businessHours2 = useAppSelector((state) => state.businessHours);
+  const userInformation = useAppSelector((state) => state.user.userInformation);
   const router = useRouter();
   const { user } = useUser();
-  const [businessHours, setBusinessHours] = useState<BusinessHour>();
-  const [activeDays, setActiveDays] = useState<number[]>([]);
-  const [startTime, setStartTime] = useState<string>(
-    businessHours?.startTime || ""
+
+  const [activeDays, setActiveDays] = useState<number[]>(
+    businessHours2?.daysOfWeek || []
   );
-  const [endTime, setEndTime] = useState<string>(businessHours?.endTime || "");
-  const [userId, setUserId] = useState<string>("");
+
+  const [startTime, setStartTime] = useState<string>(
+    businessHours2?.startTime || ""
+  );
+  const [endTime, setEndTime] = useState<string>(businessHours2?.endTime || "");
 
   const toggleActiveDay = (day: number) => {
     setActiveDays((prevDays) =>
@@ -39,7 +47,7 @@ export default function BusinessHours() {
     e.preventDefault();
 
     const businessHourData: BusinessHour = {
-      professionalId: userId,
+      professionalId: userInformation._id,
       daysOfWeek: activeDays,
       startTime,
       endTime,
@@ -47,7 +55,8 @@ export default function BusinessHours() {
 
     try {
       const response = await businessHoursService.create(businessHourData);
-      console.log(response);
+      console.log(response.data, " a ver que onda por aca");
+      dispatch(setBusinessHours(response.data));
       console.log("Horario laboral actualizado.");
       router.push("/home/calendar");
     } catch (error) {
@@ -55,50 +64,16 @@ export default function BusinessHours() {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Asegúrate de que user.email existe y es un string antes de llamar a findByEmail
-        if (!user?.email) {
-          throw new Error("Email is required");
-        }
-
-        const userResponse = await userService.findByEmail(user.email);
-        // Asegura la existencia de users[0] antes de acceder a sus propiedades
-        const userData = userResponse.data.users[0];
-        if (!userData) {
-          throw new Error("User not found");
-        }
-        const userId = userData._id;
-        setUserId(userId);
-
-        const businessHourResponse =
-          await businessHoursService.findByProfessionalId(userId);
-        // Asegúrate de que businessHourResponse.data existe antes de asignar valores
-        if (businessHourResponse.data) {
-          setStartTime(businessHourResponse.data.startTime);
-          setEndTime(businessHourResponse.data.endTime);
-          setActiveDays(businessHourResponse.data.daysOfWeek);
-          setBusinessHours(businessHourResponse.data);
-        }
-      } catch (error) {
-        console.log(
-          "Error al buscar los datos del usuario o las horas de negocio:",
-          error
-        );
-      }
-    };
-
-    if (user?.email) fetchData();
-  }, [user, userService, businessHoursService]);
-
   return (
     <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12 text-black">
       <div className="relative py-3 sm:max-w-xl sm:mx-auto">
         <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
           <div className="max-w-md mx-auto">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="text-xl font-semibold">Días de la semana:</div>
+              <div className="text-xl font-semibold">
+                Organiza tu Horario laboral, elije que dias y en que horarios
+                trabajas.
+              </div>
               <div className="grid grid-cols-4 gap-2">
                 {diasSemana.map((day, index) => (
                   <button

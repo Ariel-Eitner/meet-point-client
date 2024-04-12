@@ -94,10 +94,8 @@ export interface AppointmentModalProps {
   startTimeBlock: string;
   endTimeBlock: string;
   appointmentId?: string;
-  userId: string;
+
   setAppointmentId: (id: string) => void;
-  // Y aquí el de toggleFetchTrigger
-  toggleFetchTrigger: () => void;
 }
 
 export interface CalendarEvent {

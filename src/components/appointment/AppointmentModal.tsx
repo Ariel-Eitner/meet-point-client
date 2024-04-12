@@ -6,6 +6,14 @@ import DatePicker from "react-datepicker";
 import { Appointment, AppointmentModalProps } from "@/interfaces";
 import { appointmentService } from "@/services/appointmentService";
 import useAppointmentService from "@/hooks/useAppointmentService";
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
+import {
+  updateAppointment,
+  addAppointment,
+  setAppointments,
+} from "@/app/lib/features/appointments/appointmentsSlice";
+import { setBusinessHours } from "@/app/lib/features/businessHours/businessHoursSlice";
+import { businessHoursService } from "@/services/businessHoursService";
 
 export default function AppointmentModal({
   isModalOpen,
@@ -13,17 +21,17 @@ export default function AppointmentModal({
   startTimeBlock,
   endTimeBlock,
   appointmentId,
-  toggleFetchTrigger,
-  userId,
+
   setAppointmentId,
 }: AppointmentModalProps) {
+  const userInformation = useAppSelector((state) => state.user.userInformation);
   const formatTime = (isoString: string) => {
     const date = new Date(isoString);
     const hours = date.getHours().toString().padStart(2, "0");
     const minutes = date.getMinutes().toString().padStart(2, "0");
     return `${hours}:${minutes}`;
   };
-  const { findAllAppointmentsByUser } = useAppointmentService();
+  const dispatch = useAppDispatch();
 
   const formattedStartTime = formatTime(startTimeBlock);
   const formattedEndTime = formatTime(endTimeBlock);
@@ -65,7 +73,7 @@ export default function AppointmentModal({
     );
 
     const appointmentData: Appointment = {
-      professionalId: userId,
+      professionalId: userInformation._id,
       startDate: startDateTime,
       endDate: endDateTime,
       message: message,
@@ -78,12 +86,24 @@ export default function AppointmentModal({
           appointmentId,
           appointmentData
         );
+        dispatch(updateAppointment(response.data));
+        const appointmentResponse = await appointmentService.findAllByUser(
+          userInformation._id
+        );
+        if (appointmentResponse.data) {
+          dispatch(setAppointments(appointmentResponse.data)); // Asegúrate de que esta es la acción correcta para actualizar las citas en tu slice de Redux
+        }
+
         console.log("Cita actualizada exitosamente:", response.data);
-        toggleFetchTrigger();
       } else {
         response = await appointmentService.create(appointmentData);
         console.log("Cita creada exitosamente:", response.data);
-        toggleFetchTrigger();
+        const appointmentResponse = await appointmentService.findAllByUser(
+          userInformation._id
+        );
+        if (appointmentResponse.data) {
+          dispatch(setAppointments(appointmentResponse.data)); // Asegúrate de que esta es la acción correcta para actualizar las citas en tu slice de Redux
+        }
       }
       alert(response.data.message);
       setIsModalOpen(false);
@@ -98,7 +118,13 @@ export default function AppointmentModal({
     try {
       await appointmentService.remove(appointmentId);
       console.log("Cita eliminada exitosamente.");
-      toggleFetchTrigger();
+      const appointmentResponse = await appointmentService.findAllByUser(
+        userInformation._id
+      );
+      if (appointmentResponse.data) {
+        dispatch(setAppointments(appointmentResponse.data)); // Asegúrate de que esta es la acción correcta para actualizar las citas en tu slice de Redux
+      }
+
       setIsModalOpen(false);
       setAppointmentId("");
     } catch (error) {

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -12,13 +12,16 @@ import { userService } from "@/services/userService";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import AppointmentModal from "@/components/appointment/AppointmentModal";
 import { appointmentService } from "@/services/appointmentService";
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
 
 export default function Calendar() {
-  const { user } = useUser();
-  const [businessHours, setBusinessHours] = useState<BusinessHour>();
+  const dispatch = useAppDispatch();
+  const businessHours = useAppSelector((state) => state.businessHours);
   const [fetchTrigger, setFetchTrigger] = useState(false);
+  const userInformation = useAppSelector(
+    (state: any) => state.user.userInformation
+  );
 
-  const [userId, setUserId] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [startTimeblock, setStartTimeBlock] = useState<string>("");
   const [endTimeblock, setEndTimeBlock] = useState<string>("");
@@ -69,86 +72,105 @@ export default function Calendar() {
     }
   };
 
-  const fetchData = async () => {
-    if (!user?.email) {
-      return;
-    }
+  // const fetchData = async () => {
+  //   if (!user?.email) {
+  //     return;
+  //   }
 
-    try {
-      const userResponse = await userService.findByEmail(user.email);
-      const userId = userResponse.data.users[0]._id;
-      setUserId(userId);
+  //   try {
+  //     // const userResponse = await userService.findByEmail(user.email);
+  //     // const userId = userResponse.data.users[0]._id;
+  //     // setUserId(userId);
 
-      const businessHourResponse =
-        await businessHoursService.findByProfessionalId(userId);
-      if (businessHourResponse.data) {
-        setBusinessHours(businessHourResponse.data);
-      }
-    } catch (error) {
-      console.log(
-        "Error al buscar los datos del usuario o las horas de negocio:",
-        error
-      );
-    }
-  };
+  //     const businessHourResponse =
+  //       await businessHoursService.findByProfessionalId(userInformation._id);
+  //     if (businessHourResponse.data) {
+  //       setBusinessHours(businessHourResponse.data);
+  //     }
+  //   } catch (error) {
+  //     console.log(
+  //       "Error al buscar los datos del usuario o las horas de negocio:",
+  //       error
+  //     );
+  //   }
+  // };
 
-  useEffect(() => {
-    if (user?.email) {
-      fetchData();
-    }
-  }, [user, userService, businessHoursService]);
-  useEffect(() => {
-    const fetchDataForTrigger = async () => {
-      await fetchData();
-    };
+  // useEffect(() => {
+  //   if (user?.email) {
+  //     fetchData();
+  //   }
+  // }, [user, userService, businessHoursService]);
+  // useEffect(() => {
+  //   const fetchDataForTrigger = async () => {
+  //     await fetchData();
+  //   };
 
-    fetchDataForTrigger();
-  }, [fetchTrigger]);
-  const toggleFetchTrigger = () => {
-    setFetchTrigger(!fetchTrigger);
-  };
+  //   fetchDataForTrigger();
+  // }, [fetchTrigger]);
 
-  const [citas, setCitas] = useState([]);
+  const appointments = useAppSelector(
+    (state) => state.appointments.appointments
+  );
 
-  useEffect(() => {
-    const fetchAppointmentsByUser = async () => {
-      try {
-        const response = await appointmentService.findAllByUser(userId);
-        console.log(response);
-        setCitas(
-          response.data.map((calendarEvent: CalendarEvent) => ({
-            id: calendarEvent._id,
-            title: calendarEvent.isBlock
-              ? "Bloqueado: " + calendarEvent.message
-              : calendarEvent.message,
-            start: calendarEvent.startDate,
-            end: calendarEvent.endDate,
-            backgroundColor: calendarEvent.isBlock ? "#8B0000" : "#3788d8",
-            borderColor: calendarEvent.isBlock ? "#ff0000" : "#0b5394",
-            textColor: "#ffffff",
-          }))
-        );
-      } catch (error) {
-        console.error("Error al obtener las citas:", error);
-      }
-    };
+  const citas = appointments.map((calendarEvent) => ({
+    id: calendarEvent._id,
+    title: calendarEvent.isBlock
+      ? "Bloqueado: " + calendarEvent.message
+      : calendarEvent.message,
+    start: calendarEvent.startDate,
+    end: calendarEvent.endDate,
+    backgroundColor: calendarEvent.isBlock ? "#8B0000" : "#3788d8",
+    borderColor: calendarEvent.isBlock ? "#ff0000" : "#0b5394",
+    textColor: "#ffffff",
+  }));
 
-    fetchAppointmentsByUser();
-  }, [userId, fetchTrigger]);
+  console.log(appointments);
+
+  // useEffect(() => {
+  //   const fetchAppointmentsByUser = async () => {
+  //     try {
+  //       const response = await appointmentService.findAllByUser(
+  //         userInformation._id
+  //       );
+  //       console.log(response);
+  //       setCitas(
+  //         response.data.map((calendarEvent: CalendarEvent) => ({
+  //           id: calendarEvent._id,
+  //           title: calendarEvent.isBlock
+  //             ? "Bloqueado: " + calendarEvent.message
+  //             : calendarEvent.message,
+  //           start: calendarEvent.startDate,
+  //           end: calendarEvent.endDate,
+  //           backgroundColor: calendarEvent.isBlock ? "#8B0000" : "#3788d8",
+  //           borderColor: calendarEvent.isBlock ? "#ff0000" : "#0b5394",
+  //           textColor: "#ffffff",
+  //         }))
+  //       );
+  //     } catch (error) {
+  //       console.error("Error al obtener las citas:", error);
+  //     }
+  //   };
+
+  //   fetchAppointmentsByUser();
+  // }, [userInformation, fetchTrigger]);
 
   const handleEventClick = (clickInfo: any) => {
     const { id, title, start, end, backgroundColor, borderColor, textColor } =
       clickInfo.event;
 
-    console.log({
-      id,
-      title,
-      start: start.toISOString(),
-      end: end.toISOString(),
-      backgroundColor,
-      borderColor,
-      textColor,
-    });
+    console.log(
+      {
+        id,
+        title,
+        start: start.toISOString(),
+        end: end.toISOString(),
+        backgroundColor,
+        borderColor,
+        textColor,
+      },
+      "ahora see"
+    );
+
     setAppointmentId(id);
     setIsModalOpen(true);
     setStartTimeBlock(start);
@@ -194,8 +216,6 @@ export default function Calendar() {
               startTimeBlock={startTimeblock}
               endTimeBlock={endTimeblock}
               appointmentId={appointmentId}
-              toggleFetchTrigger={toggleFetchTrigger}
-              userId={userId}
               setAppointmentId={setAppointmentId}
             />
           </>

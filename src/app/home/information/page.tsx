@@ -1,10 +1,43 @@
 "use client";
+import { setUserInformation } from "@/app/lib/features/userInformation/userSlice";
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
 import { userService } from "@/services/userService";
 import { useUser } from "@auth0/nextjs-auth0/client";
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/app/lib/firebase/firebase";
+import { v4 as uuidv4 } from "uuid";
 
 export default function InformationPage() {
   const { user, isLoading } = useUser();
+  const dispatch = useAppDispatch();
+  const [file, setFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileChange = async (e: any) => {
+    if (e.target.files[0]) {
+      setFile(e.target.files[0]);
+      setIsUploading(true); // Inicia el indicador de carga
+      try {
+        const fileRef = ref(storage, `profileImages/${uuidv4()}`);
+        const snapshot = await uploadBytes(fileRef, e.target.files[0]);
+        const photoURL = await getDownloadURL(snapshot.ref);
+
+        // Aquí actualizas formData con el nuevo photoURL antes de enviarlo
+        setFormData({ ...formData, photoUrl: photoURL });
+
+        // Asumiendo que quieras actualizar inmediatamente el perfil del usuario con la nueva foto
+        // Puedes hacer el llamado a la API aquí o más tarde en handleSubmit
+
+        console.log(photoURL);
+      } catch (error) {
+        console.error("Error uploading file: ", error);
+        alert("Error uploading file");
+      }
+      setIsUploading(false); // Finaliza el indicador de carga
+    }
+  };
 
   const [formData, setFormData] = useState<any>({
     field: "",
@@ -18,24 +51,14 @@ export default function InformationPage() {
     githubUrl: "",
     websiteUrl: "",
     bio: "",
+    photoUrl: "",
   });
-
-  const [userId, setUserId] = useState<string>("");
+  const userInformation = useAppSelector((state) => state.user.userInformation);
+  console.log(userInformation, " que se yooo");
 
   useEffect(() => {
-    if (user?.email) {
-      userService
-        .findByEmail(user.email)
-        .then((response: any) => {
-          console.log(response.data);
-          setFormData({ ...response.data.users[0] });
-          setUserId(response.data.users[0]._id);
-        })
-        .catch((error) =>
-          console.error("Error loading professional information", error)
-        );
-    }
-  }, [user]);
+    setFormData({ ...userInformation });
+  }, [userInformation]);
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -45,15 +68,42 @@ export default function InformationPage() {
     }));
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    const operation = userService.updateUser(userId, formData);
+    // Nuevo objeto formData para acumular los datos a enviar
+    let updatedFormData = { ...formData };
+
+    if (file) {
+      try {
+        const fileRef = ref(storage, `profileImages/${uuidv4()}`);
+        const snapshot = await uploadBytes(fileRef, file);
+        const photoURL = await getDownloadURL(snapshot.ref);
+        console.log(photoURL);
+
+        // Actualizar el formData con la nueva photoURL
+        updatedFormData.photoUrl = photoURL;
+        console.log(updatedFormData);
+
+        setFile(null); // Restablecer el archivo después de la carga
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        alert("Error uploading file");
+        return; // Salir de la función en caso de error
+      }
+    }
+
+    // Usar updatedFormData que incluye la nueva photoUrl si se subió una imagen
+    const operation = userService.updateUser(
+      userInformation._id,
+      updatedFormData
+    );
 
     operation
       .then((response) => {
         alert("Professional information saved successfully");
         console.log(response.data);
+        dispatch(setUserInformation(response.data.user));
       })
       .catch((error) => {
         console.error("Failed to save professional information", error);
@@ -72,6 +122,57 @@ export default function InformationPage() {
             Completa los siguientes datos para actualizar tu perfil.
           </p>
         </div>
+        {userInformation && userInformation.photoUrl ? (
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <Image
+              src={userInformation.photoUrl}
+              alt="User Image"
+              width={150}
+              height={150}
+              className="rounded-full object-cover"
+            />
+            {isUploading ? (
+              <div>Cargando...</div>
+            ) : (
+              <>
+                <label
+                  htmlFor="file-upload"
+                  className="cursor-pointer py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Cambiar foto
+                </label>
+                <input
+                  id="file-upload"
+                  type="file"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center">
+            {isUploading ? (
+              <div>Cargando...</div>
+            ) : (
+              <>
+                <label
+                  htmlFor="file-upload"
+                  className="cursor-pointer py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Subir foto
+                </label>
+                <input
+                  id="file-upload"
+                  type="file"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </>
+            )}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="rounded-md shadow-sm -space-y-px">
             {[

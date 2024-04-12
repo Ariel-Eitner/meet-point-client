@@ -7,81 +7,48 @@ import { appointmentService } from "@/services/appointmentService";
 import { CalendarEvent } from "@/interfaces";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
+import { deleteAppointment } from "@/app/lib/features/appointments/appointmentsSlice";
 
 export default function AppointmentsPage() {
+  const dispatch = useAppDispatch();
   const { user } = useUser();
-  const [userId, setUserId] = useState<string>("");
-  const [citas, setCitas] = useState<CalendarEvent[] | any>([]);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (!user?.email) {
-        console.error("No user email found, skipping fetch");
-        return;
-      }
+  const userInformation = useAppSelector((state) => state.user.userInformation);
 
-      try {
-        const userResponse = await userService.findByEmail(user.email);
-        if (userResponse.data && userResponse.data.users.length > 0) {
-          const userId = userResponse.data.users[0]._id;
-          setUserId(userId);
-        } else {
-          console.error("No user found with given email");
-        }
-      } catch (error) {
-        console.error("Error al buscar los datos del usuario:", error);
-      }
-    };
+  const citas = useAppSelector((state) => state.appointments.appointments).map(
+    (calendarEvent) => ({
+      id: calendarEvent._id,
+      title: calendarEvent.isBlock
+        ? "Bloqueado: " + calendarEvent.message
+        : calendarEvent.message,
+      start: calendarEvent.startDate,
+      end: calendarEvent.endDate,
+      backgroundColor: calendarEvent.isBlock ? "#8B0000" : "#3788d8",
+      borderColor: calendarEvent.isBlock ? "#ff0000" : "#0b5394",
+      textColor: "#ffffff",
+    })
+  );
 
-    if (user?.email) fetchUser();
-  }, [user?.email]);
-
-  useEffect(() => {
-    const fetchAppointmentsByUser = async () => {
-      if (!userId) return;
-      try {
-        const response = await appointmentService.findAllByUser(userId);
-        const citasTransformadas = response.data.map(
-          (calendarEvent: CalendarEvent) => ({
-            id: calendarEvent._id,
-            title: calendarEvent.isBlock
-              ? "Bloqueado: " + calendarEvent.message
-              : calendarEvent.message,
-            start: calendarEvent.startDate,
-            end: calendarEvent.endDate,
-            backgroundColor: calendarEvent.isBlock ? "#8B0000" : "#3788d8",
-            borderColor: calendarEvent.isBlock ? "#ff0000" : "#0b5394",
-            textColor: "#ffffff",
-          })
-        );
-        setCitas(citasTransformadas);
-      } catch (error) {
-        console.error("Error al obtener las citas:", error);
-      }
-    };
-
-    fetchAppointmentsByUser();
-  }, [userId]); // Se ejecuta cuando userId cambia
-
-  const handleRemove = (id: string) => {
+  const handleRemove = async (e: any, id: string) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (window.confirm("¿Estás seguro de que deseas eliminar esta cita?")) {
-      appointmentService
-        .remove(id)
-        .then(() => {
-          // Actualiza el estado para eliminar la cita de la UI
-          setCitas(citas.filter((cita: any) => cita.id !== id));
-          alert("Cita eliminada con éxito");
-        })
-        .catch((error) => {
-          console.error("Error al eliminar la cita", error);
-          alert("No se pudo eliminar la cita");
-        });
+      try {
+        await appointmentService.remove(id);
+        dispatch(deleteAppointment(id)); // Despacha la acción de eliminar cita
+        alert("Cita eliminada con éxito");
+        dispatch(deleteAppointment(id));
+      } catch (error) {
+        console.error("Error al eliminar la cita", error);
+        alert("No se pudo eliminar la cita");
+      }
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 ">
-      {citas.length > 0 ? (
+      {citas && citas.length > 0 ? (
         citas.map((cita: any) => (
           <div
             key={cita.id}
@@ -92,7 +59,7 @@ export default function AppointmentsPage() {
             >
               <h3 className="font-bold text-lg">{cita.title}</h3>
               <button
-                onClick={() => handleRemove(cita.id)}
+                onClick={(e) => handleRemove(e, cita.id)}
                 className=" py-2 px-4 bg-red-500 text-white rounded hover:bg-red-700 transition-colors duration-150"
               >
                 Eliminar

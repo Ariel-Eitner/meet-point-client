@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { MainNavbar } from "@/components/navbar/navbar";
+
 import { UserProvider } from "@auth0/nextjs-auth0/client";
 import SideBar from "@/components/sidebar/sidebar";
+import StoreProvider from "./StoreProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,9 +20,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <UserProvider>
-        <body>{children}</body>
-      </UserProvider>
+      <StoreProvider>
+        <UserProvider>
+          <body>{children}</body>
+        </UserProvider>
+      </StoreProvider>
     </html>
   );
 }
