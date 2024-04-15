@@ -6,6 +6,7 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 export default function CreateUser() {
   const { createUserForm, handleChange, handleSubmit } = useCreateUser();
   const { user, error, isLoading } = useUser();
+  console.log(user);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-green-400 via-blue-500 to-gray-600">

@@ -9,6 +9,7 @@ export default function SideBar() {
   const user = ProtectRoute();
 
   const [userRole, setUserRole] = useState<string>("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -171,15 +172,15 @@ export default function SideBar() {
   };
 
   return (
-    <div className="fixed top-0 left-0 h-full flex flex-col bg-white shadow-lg w-64">
+    <div className="fixed top-0 left-0 h-full flex flex-col bg-white shadow-lg w-64 z-50">
       <div className="px-4 py-6">
         <h1 className="text-xl font-semibold text-gray-700">{user?.name}</h1>
       </div>
       <div className="flex flex-col px-4">{renderLinks()}</div>
-      <div className="mt-auto px-4 py-6 ">
-        <Link
-          href="/home/profile"
-          className="flex items-center space-x-2 font-semibold bg-gray-200 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-300"
+      <div className="mt-auto px-4 py-6">
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="flex items-center space-x-2 font-semibold bg-gray-200 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-300 w-full"
         >
           {user?.picture && (
             <Image
@@ -191,7 +192,24 @@ export default function SideBar() {
             />
           )}
           <span className="text-gray-900">{user?.name}</span>
-        </Link>
+        </button>
+
+        {isMenuOpen && (
+          <div className="absolute  bottom-20 mt-2 w-56 bg-gray-200  hover:bg-gray-100 rounded-md shadow-lg z-50">
+            <ul className="py-1 z-50">
+              <li>
+                <a
+                  href="/api/auth/logout"
+                  // onClick={handleLogout}
+                  className="block px-4 py-2 font-semibold text-sm text-gray-700  z-50"
+                >
+                  Cerrar sesión
+                </a>
+              </li>
+              {/* Agrega aquí más opciones al menú si es necesario */}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

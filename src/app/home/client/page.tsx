@@ -2,16 +2,20 @@
 import React, { useState, useEffect } from "react";
 import { userService } from "@/services/userService";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ClientPage() {
   const [users, setUsers] = useState([]);
+
+  console.log(users, "de aca");
 
   useEffect(() => {
     userService
       .getAllUsers()
       .then((response) => {
+        console.log(response);
         // Filtra solo a los usuarios con rol 'professional'
-        const professionals = response.data.filter(
+        const professionals = response.data.users.filter(
           (user: any) => user.role === "professional"
         );
         setUsers(professionals);
@@ -32,6 +36,12 @@ export default function ClientPage() {
               href={`/home/client/professional/${user._id}`}
               key={user.email}
             >
+              <Image
+                src={user.photoUrl}
+                width={100}
+                height={100}
+                alt="profesional"
+              />
               <h3 className="text-lg font-bold text-black">{user.name}</h3>
               <p className="text-black">Email: {user.email}</p>
               <p className="text-black">Rol: {user.role}</p>

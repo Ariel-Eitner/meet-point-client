@@ -15,6 +15,7 @@ export function useCreateUser() {
     phoneNumber: "",
     country: "",
     role: "client",
+    googleId: user?.sub || "",
   });
 
   useEffect(() => {

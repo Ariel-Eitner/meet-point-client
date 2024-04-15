@@ -5,39 +5,22 @@ import { userService } from "@/services/userService";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 import { storage } from "@/app/lib/firebase/firebase";
 import { v4 as uuidv4 } from "uuid";
-
+import { useRouter } from "next/navigation";
 export default function InformationPage() {
   const { user, isLoading } = useUser();
   const dispatch = useAppDispatch();
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-
-  const handleFileChange = async (e: any) => {
-    if (e.target.files[0]) {
-      setFile(e.target.files[0]);
-      setIsUploading(true); // Inicia el indicador de carga
-      try {
-        const fileRef = ref(storage, `profileImages/${uuidv4()}`);
-        const snapshot = await uploadBytes(fileRef, e.target.files[0]);
-        const photoURL = await getDownloadURL(snapshot.ref);
-
-        // Aquí actualizas formData con el nuevo photoURL antes de enviarlo
-        setFormData({ ...formData, photoUrl: photoURL });
-
-        // Asumiendo que quieras actualizar inmediatamente el perfil del usuario con la nueva foto
-        // Puedes hacer el llamado a la API aquí o más tarde en handleSubmit
-
-        console.log(photoURL);
-      } catch (error) {
-        console.error("Error uploading file: ", error);
-        alert("Error uploading file");
-      }
-      setIsUploading(false); // Finaliza el indicador de carga
-    }
-  };
+  const router = useRouter();
+  const userInformation = useAppSelector((state) => state.user.userInformation);
 
   const [formData, setFormData] = useState<any>({
     field: "",
@@ -53,8 +36,92 @@ export default function InformationPage() {
     bio: "",
     photoUrl: "",
   });
-  const userInformation = useAppSelector((state) => state.user.userInformation);
-  console.log(userInformation, " que se yooo");
+
+  const handleDeleteUser = async () => {
+    const confirmDelete = confirm(
+      "Esta acción es irreversible y eliminará todos tus datos, incluyendo email, citas, horarios, etc. ¿Deseas continuar?"
+    );
+    if (confirmDelete) {
+      try {
+        if (userInformation.photoUrl) {
+          const photoRef = ref(storage, userInformation.photoUrl);
+          await deleteObject(photoRef);
+        }
+        await userService.deleteUser(userInformation._id);
+        alert("Usuario eliminado correctamente.");
+        setFormData({});
+        dispatch(setUserInformation({}));
+        router.push("/api/auth/logout");
+      } catch (error) {
+        console.error("Error al eliminar el usuario:", error);
+        alert("Error al eliminar el usuario.");
+      }
+    }
+  };
+
+  const handleFileChange = async (e: any) => {
+    const file = e.target.files[0];
+    if (!file) {
+      alert("No file selected.");
+      return;
+    }
+
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (file.size > maxSize) {
+      alert("File is too large. Maximum size is 2MB.");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file.");
+      return;
+    }
+
+    setFile(file);
+    setIsUploading(true);
+    try {
+      if (userInformation.photoUrl) {
+        const photoRef = ref(storage, userInformation.photoUrl);
+        await deleteObject(photoRef);
+      }
+      const fileRef = ref(storage, `profileImages/${uuidv4()}`);
+      const snapshot = await uploadBytes(fileRef, file);
+      const photoURL = await getDownloadURL(snapshot.ref);
+
+      setFormData((prevState: any) => ({
+        ...prevState,
+        photoUrl: photoURL,
+      }));
+
+      console.log(photoURL);
+      console.log(formData);
+    } catch (error) {
+      console.error("Error uploading file: ", error);
+      alert("Error uploading file");
+    }
+    setIsUploading(false); // Finaliza el indicador de carga
+  };
+  useEffect(() => {
+    const updateUserData = async () => {
+      if (formData.photoUrl) {
+        // Asegúrate de que photoUrl no esté vacío
+        try {
+          // Llama a userService.updateUser con la última versión de formData
+          const response = await userService.updateUser(
+            userInformation._id,
+            formData
+          );
+          console.log(response);
+          dispatch(setUserInformation(response.data.user));
+          console.log("User updated with new photo URL");
+        } catch (error) {
+          console.error("Error updating user: ", error);
+          alert("Error updating user");
+        }
+      }
+    };
+
+    updateUserData();
+  }, [formData.photoUrl]);
 
   useEffect(() => {
     setFormData({ ...userInformation });
@@ -74,24 +141,24 @@ export default function InformationPage() {
     // Nuevo objeto formData para acumular los datos a enviar
     let updatedFormData = { ...formData };
 
-    if (file) {
-      try {
-        const fileRef = ref(storage, `profileImages/${uuidv4()}`);
-        const snapshot = await uploadBytes(fileRef, file);
-        const photoURL = await getDownloadURL(snapshot.ref);
-        console.log(photoURL);
+    // if (file) {
+    //   try {
+    //     const fileRef = ref(storage, `profileImages/${uuidv4()}`);
+    //     const snapshot = await uploadBytes(fileRef, file);
+    //     const photoURL = await getDownloadURL(snapshot.ref);
+    //     console.log(photoURL);
 
-        // Actualizar el formData con la nueva photoURL
-        updatedFormData.photoUrl = photoURL;
-        console.log(updatedFormData);
+    //     // Actualizar el formData con la nueva photoURL
+    //     updatedFormData.photoUrl = photoURL;
+    //     console.log(updatedFormData);
 
-        setFile(null); // Restablecer el archivo después de la carga
-      } catch (error) {
-        console.error("Error uploading file:", error);
-        alert("Error uploading file");
-        return; // Salir de la función en caso de error
-      }
-    }
+    //     setFile(null);
+    //   } catch (error) {
+    //     console.error("Error uploading file:", error);
+    //     alert("Error uploading file");
+    //     return; // Salir de la función en caso de error
+    //   }
+    // }
 
     // Usar updatedFormData que incluye la nueva photoUrl si se subió una imagen
     const operation = userService.updateUser(
@@ -123,16 +190,16 @@ export default function InformationPage() {
           </p>
         </div>
         {userInformation && userInformation.photoUrl ? (
-          <div className="flex flex-col items-center justify-center space-y-4">
+          <div className="flex flex-col items-center justify-center space-y-4 text-black">
             <Image
               src={userInformation.photoUrl}
               alt="User Image"
               width={150}
               height={150}
-              className="rounded-full object-cover"
+              className="rounded-full object-cover text-black"
             />
             {isUploading ? (
-              <div>Cargando...</div>
+              <div className="text-black">Cargando...</div>
             ) : (
               <>
                 <label
@@ -146,12 +213,16 @@ export default function InformationPage() {
                   type="file"
                   onChange={handleFileChange}
                   className="hidden"
+                  accept="image/jpeg, image/png"
                 />
+                <p className="text-xs mt-2">
+                  Tamaño máximo: 2MB. Formatos permitidos: JPG, PNG.
+                </p>
               </>
             )}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center text-black">
             {isUploading ? (
               <div>Cargando...</div>
             ) : (
@@ -167,7 +238,11 @@ export default function InformationPage() {
                   type="file"
                   onChange={handleFileChange}
                   className="hidden"
+                  accept="image/jpeg, image/png"
                 />
+                <p className="text-xs mt-2">
+                  Tamaño máximo: 2MB. Formatos permitidos: JPG, PNG.
+                </p>
               </>
             )}
           </div>
@@ -227,6 +302,12 @@ export default function InformationPage() {
             </button>
           </div>
         </form>
+        <button
+          onClick={handleDeleteUser}
+          className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+        >
+          Eliminar Usuario
+        </button>
       </div>
     </div>
   );
