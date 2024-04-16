@@ -5,15 +5,14 @@ import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import { Appointment, AppointmentModalProps } from "@/interfaces";
 import { appointmentService } from "@/services/appointmentService";
-import useAppointmentService from "@/hooks/useAppointmentService";
 import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
 import {
   updateAppointment,
-  addAppointment,
   setAppointments,
+  addAppointment,
 } from "@/app/lib/features/appointments/appointmentsSlice";
-import { setBusinessHours } from "@/app/lib/features/businessHours/businessHoursSlice";
-import { businessHoursService } from "@/services/businessHoursService";
+import { formatTime } from "@/utils/utils";
+import { useParams } from "next/navigation";
 
 export default function AppointmentModal({
   isModalOpen,
@@ -21,30 +20,22 @@ export default function AppointmentModal({
   startTimeBlock,
   endTimeBlock,
   appointmentId,
-
   setAppointmentId,
 }: AppointmentModalProps) {
   const userInformation = useAppSelector((state) => state.user.userInformation);
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    return `${hours}:${minutes}`;
-  };
   const dispatch = useAppDispatch();
-
   const formattedStartTime = formatTime(startTimeBlock);
   const formattedEndTime = formatTime(endTimeBlock);
-
   const [selectedDate, setSelectedDate] = useState(new Date(startTimeBlock));
+  const [message, setMessage] = useState("");
+  const [startTime, setStartTime] = useState(formattedStartTime);
+  const [endTime, setEndTime] = useState(formattedEndTime);
+  const id = useParams().id as string;
+  let appointmentData: Appointment;
 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
   };
-
-  const [message, setMessage] = useState("");
-  const [startTime, setStartTime] = useState(formattedStartTime);
-  const [endTime, setEndTime] = useState(formattedEndTime);
 
   const handleMessageChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
@@ -72,13 +63,24 @@ export default function AppointmentModal({
       parseInt(endTime.split(":")[1])
     );
 
-    const appointmentData: Appointment = {
-      professionalId: userInformation._id,
-      startDate: startDateTime,
-      endDate: endDateTime,
-      message: message,
-      isBlock: true,
-    };
+    if (userInformation.role === "professional") {
+      appointmentData = {
+        professionalId: userInformation._id,
+        startDate: startDateTime,
+        endDate: endDateTime,
+        message: message,
+        isBlock: true,
+      };
+    } else if (userInformation.role === "client") {
+      appointmentData = {
+        professionalId: id,
+        startDate: startDateTime,
+        endDate: endDateTime,
+        message: message,
+        isBlock: false,
+        userId: userInformation._id,
+      };
+    }
     try {
       let response;
       if (appointmentId) {
@@ -97,6 +99,7 @@ export default function AppointmentModal({
         console.log("Cita actualizada exitosamente:", response.data);
       } else {
         response = await appointmentService.create(appointmentData);
+        dispatch(addAppointment(response.data));
         console.log("Cita creada exitosamente:", response.data);
         const appointmentResponse = await appointmentService.findAllByUser(
           userInformation._id
@@ -122,14 +125,13 @@ export default function AppointmentModal({
         userInformation._id
       );
       if (appointmentResponse.data) {
-        dispatch(setAppointments(appointmentResponse.data)); // Asegúrate de que esta es la acción correcta para actualizar las citas en tu slice de Redux
+        dispatch(setAppointments(appointmentResponse.data));
       }
 
       setIsModalOpen(false);
       setAppointmentId("");
     } catch (error) {
       console.error("Error al eliminar la cita:", error);
-      // Aquí puedes manejar el error, por ejemplo, mostrando un mensaje al usuario.
     }
   };
 

@@ -1,31 +1,71 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import AppointmentModal from "@/components/appointment/AppointmentModal";
+import { todayStr } from "@/utils/utils";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import resourceTimelinePlugin from "@fullcalendar/resource-timeline";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { todayStr } from "@/utils/utils";
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { businessHoursService } from "@/services/businessHoursService";
-import { BusinessHour, CalendarEvent } from "@/interfaces";
-import { userService } from "@/services/userService";
-import { useUser } from "@auth0/nextjs-auth0/client";
-import AppointmentModal from "@/components/appointment/AppointmentModal";
 import { appointmentService } from "@/services/appointmentService";
+import { BusinessHour, CalendarEvent } from "@/interfaces";
 import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
+import { setBusinessHours } from "@/app/lib/features/businessHours/businessHoursSlice";
+import {
+  setAppointments,
+  updateAppointment,
+} from "@/app/lib/features/appointments/appointmentsSlice";
 
-export default function Calendar() {
-  const dispatch = useAppDispatch();
-  const businessHours = useAppSelector((state) => state.businessHours);
-  const [fetchTrigger, setFetchTrigger] = useState(false);
-  const userInformation = useAppSelector(
-    (state: any) => state.user.userInformation
-  );
-
+export default function page() {
+  const id = useParams().id as string;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [startTimeblock, setStartTimeBlock] = useState<string>("");
   const [endTimeblock, setEndTimeBlock] = useState<string>("");
   const [appointmentId, setAppointmentId] = useState<string>("");
+
+  const businessHours = useAppSelector((state) => state.businessHours);
+  const dispatch = useAppDispatch();
+
+  // const [businessHours, setBusinessHours] = useState<BusinessHour>();
+  const appointments = useAppSelector(
+    (state) => state.appointments.appointments
+  );
+
+  useEffect(() => {
+    // Asegurarse de que id esté disponible (no será en el primer render)
+    if (id) {
+      businessHoursService
+        .findByProfessionalId(id)
+        .then((response) => {
+          dispatch(setBusinessHours(response.data));
+        })
+        .catch((error) => {
+          console.error("Error al obtener las horas de negocio:", error);
+        });
+      appointmentService
+        .findAllByUser(id)
+        .then((response) => {
+          dispatch(setAppointments(response.data));
+        })
+        .catch((error) => {
+          console.error("Error al obtener las horas de negocio:", error);
+        });
+    }
+  }, [id, dispatch, appointments.length]);
+
+  const citas = appointments.map((calendarEvent) => ({
+    id: calendarEvent._id,
+    title: calendarEvent.isBlock
+      ? "Bloqueado: " + calendarEvent.message
+      : calendarEvent.message,
+    start: calendarEvent.startDate,
+    end: calendarEvent.endDate,
+    backgroundColor: calendarEvent.isBlock ? "#8B0000" : "#3788d8",
+    borderColor: calendarEvent.isBlock ? "#ff0000" : "#0b5394",
+    textColor: "#ffffff",
+  }));
 
   const handleDateSelect = (selectInfo: any) => {
     setStartTimeBlock(selectInfo.startStr);
@@ -72,58 +112,6 @@ export default function Calendar() {
     }
   };
 
-  // const fetchData = async () => {
-  //   if (!user?.email) {
-  //     return;
-  //   }
-
-  //   try {
-  //     // const userResponse = await userService.findByEmail(user.email);
-  //     // const userId = userResponse.data.users[0]._id;
-  //     // setUserId(userId);
-
-  //     const businessHourResponse =
-  //       await businessHoursService.findByProfessionalId(userInformation._id);
-  //     if (businessHourResponse.data) {
-  //       setBusinessHours(businessHourResponse.data);
-  //     }
-  //   } catch (error) {
-  //     console.log(
-  //       "Error al buscar los datos del usuario o las horas de negocio:",
-  //       error
-  //     );
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (user?.email) {
-  //     fetchData();
-  //   }
-  // }, [user, userService, businessHoursService]);
-  // useEffect(() => {
-  //   const fetchDataForTrigger = async () => {
-  //     await fetchData();
-  //   };
-
-  //   fetchDataForTrigger();
-  // }, [fetchTrigger]);
-
-  const appointments = useAppSelector(
-    (state) => state.appointments.appointments
-  );
-
-  const citas = appointments.map((calendarEvent) => ({
-    id: calendarEvent._id,
-    title: calendarEvent.isBlock
-      ? "Bloqueado: " + calendarEvent.message
-      : calendarEvent.message,
-    start: calendarEvent.startDate,
-    end: calendarEvent.endDate,
-    backgroundColor: calendarEvent.isBlock ? "#8B0000" : "#3788d8",
-    borderColor: calendarEvent.isBlock ? "#ff0000" : "#0b5394",
-    textColor: "#ffffff",
-  }));
-
   const handleEventClick = (clickInfo: any) => {
     const { id, title, start, end, backgroundColor, borderColor, textColor } =
       clickInfo.event;
@@ -147,6 +135,8 @@ export default function Calendar() {
     setEndTimeBlock(end);
   };
 
+  console.log(appointments);
+  console.log(citas);
   return (
     <>
       <div className="calendar-container bg-gray-700">

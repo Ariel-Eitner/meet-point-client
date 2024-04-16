@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { userService } from "@/services/userService";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function ProfessionalPage() {
   const [user, setUser] = useState<any>(null);
@@ -47,7 +48,14 @@ export default function ProfessionalPage() {
       <p className="mb-2 text-black">
         <span className="font-semibold">País:</span> {user.country}
       </p>
-      {/* Aquí puedes seguir agregando más propiedades si las necesitas */}
+
+      <Link
+        className="text-black"
+        href={`/home/client/professional/calendar/${id}`}
+      >
+        {" "}
+        ver calendario
+      </Link>
     </div>
   );
 }
