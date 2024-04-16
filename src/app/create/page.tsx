@@ -9,19 +9,30 @@ export default function CreateUser() {
   console.log(user);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-green-400 via-blue-500 to-gray-600">
-      <div className="max-w-md w-full space-y-8 p-10 bg-white shadow-lg rounded-lg">
+    <div
+      className="flex items-center justify-center min-h-screen bg-gradient-to-r from-green-400 via-blue-500 to-gray-600"
+      style={{ fontFamily: "serif", fontWeight: "lighter" }}
+    >
+      <div
+        className="max-w-md w-full space-y-8 p-10  shadow-lg rounded-3xl text-center"
+        style={{ backgroundColor: "#EFEFE8", borderColor: "#2D4737" }}
+      >
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+          <h2
+            className="mt-6 text-3xl font-extrabold"
+            style={{ color: "#2D4737" }}
+          >
             Crear Cuenta
           </h2>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 " style={{ color: "#2D4737" }}>
             Únete a nuestra creciente comunidad
           </p>
-          <p className="mt-2 text-gray-600">Completa tus datos</p>
+          <p className="mt-2 " style={{ color: "#2D4737" }}>
+            Completa tus datos
+          </p>
         </div>
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <label htmlFor="firstName" className=" text-black">
+          <label htmlFor="firstName" className=" " style={{ color: "#2D4737" }}>
             Primer Nombre <span className="text-red-500">*</span>
             <input
               type="text"
@@ -30,10 +41,15 @@ export default function CreateUser() {
               onChange={handleChange}
               defaultValue={(user?.given_name || "") as string}
               required
-              className="appearance-none rounded-none relative block w-full px-3 mb-5 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              style={{ backgroundColor: "#EFEFE8", color: "#2D4737" }}
+              className="appearance-none rounded-none relative block w-full px-3 mb-5 py-2 border border-gray-300 placeholder-gray-500  rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm text-center"
             />
           </label>
-          <label htmlFor="middleName" className=" text-black">
+          <label
+            htmlFor="middleName"
+            className=" "
+            style={{ color: "#2D4737" }}
+          >
             Segundo Nombre
             <input
               type="text"
@@ -41,10 +57,11 @@ export default function CreateUser() {
               placeholder="Segundo Nombre"
               onChange={handleChange}
               defaultValue={""}
-              className="appearance-none rounded-none relative block w-full px-3 mb-5 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              style={{ backgroundColor: "#EFEFE8", color: "#2D4737" }}
+              className=" text-center appearance-none rounded-none relative block w-full px-3 mb-5 py-2 border border-gray-300 placeholder-gray-500  rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
             />
           </label>
-          <label htmlFor="lastName" className=" text-black">
+          <label htmlFor="lastName" className="" style={{ color: "#2D4737" }}>
             Apellido <span className="text-red-500">*</span>
             <input
               type="text"
@@ -53,10 +70,11 @@ export default function CreateUser() {
               onChange={handleChange}
               defaultValue={(user?.family_name || "") as string}
               required
-              className="appearance-none rounded-none relative block w-full px-3 mb-5 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              style={{ backgroundColor: "#EFEFE8" }}
+              className="text-center appearance-none rounded-none relative block w-full px-3 mb-5 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
             />
           </label>
-          <label htmlFor="email" className=" text-black">
+          <label htmlFor="email" className=" " style={{ color: "#2D4737" }}>
             Email <span className="text-red-500">*</span>
             <input
               type="email"
@@ -66,11 +84,16 @@ export default function CreateUser() {
               value={user?.email || ""}
               required
               disabled
-              className="appearance-none rounded-none relative block w-full px-3 py-2 mb-5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              style={{ backgroundColor: "#EFEFE8", color: "#2D4737" }}
+              className="text-center appearance-none rounded-none relative block w-full px-3 py-2 mb-5 border border-gray-300 placeholder-gray-500  focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
             />
           </label>
 
-          <label htmlFor="phoneNumber" className=" text-black">
+          <label
+            htmlFor="phoneNumber"
+            className=" "
+            style={{ color: "#2D4737" }}
+          >
             Numero Móvil
             <input
               type="text"
@@ -78,10 +101,11 @@ export default function CreateUser() {
               placeholder="Número de Teléfono"
               onChange={handleChange}
               value={createUserForm.phoneNumber}
-              className="appearance-none rounded-none relative block w-full px-3 py-2 mb-5 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              style={{ backgroundColor: "#EFEFE8", color: "#2D4737" }}
+              className="text-center appearance-none rounded-none relative block w-full px-3 py-2 mb-5 border border-gray-300 placeholder-gray-500  rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
             />
           </label>
-          <label htmlFor="country" className="text-black">
+          <label htmlFor="country" className="" style={{ color: "#2D4737" }}>
             País
             <input
               type="text"
@@ -89,17 +113,19 @@ export default function CreateUser() {
               placeholder="País"
               onChange={handleChange}
               value={createUserForm.country || ""}
-              className="appearance-none rounded-none relative block w-full px-3 py-2 mb-5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              style={{ backgroundColor: "#EFEFE8", color: "#2D4737" }}
+              className="text-center appearance-none rounded-none relative block w-full px-3 py-2 mb-5 border border-gray-300 placeholder-gray-500  focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
             />
           </label>
-          <label htmlFor="role" className="text-black">
+          <label htmlFor="role" className="" style={{ color: "#2D4737" }}>
             Tipo de Usuario <span className="text-red-500">*</span>
             <select
               name="role"
               onChange={handleChange}
               value={createUserForm.role}
               required
-              className="appearance-none rounded-none relative block w-full px-3 py-2 mb-5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              style={{ backgroundColor: "#EFEFE8", color: "#2D4737" }}
+              className="text-center appearance-none rounded-none relative block w-full px-3 py-2 mb-5 border border-gray-300 placeholder-gray-500  focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
             >
               <option value="professional">Profesional</option>
               <option value="client">Cliente</option>

@@ -1,59 +1,81 @@
 import { MainNavbar } from "@/components/navbar/navbar";
-import Image from "next/image";
+import ClipLogo from "../../public/clip.svg";
 
 export default function Home() {
   return (
     <>
       <MainNavbar />
-      <div className="container mx-auto px-4">
-        <div className="flex flex-wrap items-center mt-2">
-          <div className="w-full md:w-1/2 p-4">
-            <h1 className="text-3xl font-bold">Bienvenido a Meet Point</h1>
-            <p className="mt-4">
-              Meet Point no es solo una plataforma en línea; es una revolución
-              en el acceso que une a pacientes y profesionales en un entorno
-              digital seguro y amigable. Descubre lo que puedes hacer en Meet
-              Point:
-            </p>
-            <ul className="list-disc pl-5 mt-4">
-              <li>
-                <strong>Expandir Alcance:</strong> Si eres un profesional de
-                cualquier rubro, regístrate y proyecta tus servicios a una
-                comunidad en línea creciente, llegando a clientes que realmente
-                necesitan tu experiencia.
-              </li>
-              <li>
-                <strong>Conexión Directa:</strong> Como cliente, accede a un
-                directorio extenso de profesionales, encuentra el que mejor se
-                ajuste a tus necesidades y comunícate con ellos de manera
-                sencilla y directa.
-              </li>
-            </ul>
-            <p className="mt-4">
-              En Meet Point, la seguridad y la privacidad de tu información son
-              nuestra máxima prioridad. Adoptamos protocolos de seguridad
-              avanzados y garantizamos que tu historial se guarda en un ambiente
-              encriptado, otorgándote el control total sobre quién puede verlo.
-              Con nosotros, tu información están en las mejores manos.
-            </p>
-          </div>
-          <div className="w-full md:w-1/2 p-4 flex justify-center"></div>
+
+      <div
+        className="flex flex-col items-center justify-evenly h-screen  px-4"
+        style={{
+          backgroundColor: "#EFEFE8",
+          fontFamily: "serif",
+          fontWeight: "lighter",
+        }}
+      >
+        <div className="flex items-baseline">
+          <h1
+            className="text-5xl font-thin"
+            style={{ color: "#2D4737", fontWeight: "lighter" }}
+          >
+            MEET POINT
+          </h1>
+          <span className="flex m-0 p-0">
+            <img
+              src="/clip.svg"
+              alt="Clip Logo"
+              className="w-9 h-9 rotate-12"
+            />
+            <img
+              src="/clip.svg"
+              alt="Clip Logo"
+              className="w-9 h-9 transform rotate-45 -ml-5 mt-2"
+            />
+          </span>
         </div>
-        <div className="mt-12 mx-auto px-4">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold">
-              Conozca a nuestros profesionales
-            </h2>
-            <p className="mt-2">
-              Breve descripción de los profesionales y sus especialidades.
-            </p>
+        <div className="mx-auto max-w-2xl">
+          <p
+            className="text-center mb-8 text-2xl tracking-widest"
+            style={{ color: "#2D4737" }}
+          >
+            Hola
+            <br />
+            Somos tu plataforma de encuentro
+            <br />
+            Nuestro fin es facilitarte la conectividad con
+            <br />
+            diversas herramientas y servicios.
+            <br />
+            Sigue scrolleando para cubrir tu necesidad y no
+            <br />
+            olvides registrarte para mejorar tu experiencia
+          </p>
+        </div>
+        <div className="flex  space-x-32 ">
+          <div className="text-center flex flex-col items-center">
+            <div
+              className="w-16 h-16 rounded-full mb-2"
+              style={{ backgroundColor: "#2D4737" }}
+            ></div>
+            <p className="text-gray-700">María Perez</p>
+            <p className="text-sm text-gray-600">Psicología integral</p>
           </div>
-          <div className="flex items-center justify-between mt-8">
-            <div className="flex justify-center items-center w-10"></div>
-            <div className="flex overflow-hidden justify-center items-center">
-              <div className="flex space-x-4"></div>
-            </div>
-            <div className="flex justify-center items-center w-10"></div>
+          <div className="text-center flex flex-col items-center">
+            <div
+              className="w-16 h-16  rounded-full mb-2"
+              style={{ backgroundColor: "#2D4737" }}
+            ></div>
+            <p className="text-gray-700">Sofía Lopez</p>
+            <p className="text-sm text-gray-600">Licenciada en Biología</p>
+          </div>
+          <div className="text-center flex flex-col items-center">
+            <div
+              className="w-16 h-16 rounded-full mb-2"
+              style={{ backgroundColor: "#2D4737" }}
+            ></div>
+            <p className="text-gray-700">Mario Alonso</p>
+            <p className="text-sm text-gray-600">Profesor de Matemáticas</p>
           </div>
         </div>
       </div>

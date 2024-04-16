@@ -9,15 +9,12 @@ export const MainNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="bg-gray-100">
+    <nav style={{ backgroundColor: "#EFEFE8" }}>
       <div className="max-w-6xl mx-auto px-4">
-        <div className="flex justify-between">
-          <div className="flex space-x-4">
+        <div className="flex justify-between items-center">
+          <div className="flex space-x-4 items-center">
             {/* Logo and website name */}
-            <a
-              href="/"
-              className="flex items-center py-5 px-2 text-gray-700 hover:text-gray-900"
-            >
+            <a href="/" className="py-5 px-2 text-gray-700 hover:text-gray-900">
               <span className="font-bold">Meet Point</span>
             </a>
           </div>
