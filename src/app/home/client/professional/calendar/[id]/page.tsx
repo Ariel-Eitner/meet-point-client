@@ -18,7 +18,7 @@ import {
   updateAppointment,
 } from "@/app/lib/features/appointments/appointmentsSlice";
 
-export default function page() {
+export default function ProfesionalCalendar() {
   const id = useParams().id as string;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [startTimeblock, setStartTimeBlock] = useState<string>("");
