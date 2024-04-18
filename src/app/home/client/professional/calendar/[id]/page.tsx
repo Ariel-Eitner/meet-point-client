@@ -75,32 +75,38 @@ export default function ProfesionalCalendar() {
     if (calendarApi.view.type === "timeGridDay") {
       const startTime = new Date(selectInfo.start);
       const endTime = new Date(selectInfo.end);
+
+      // Construir objetos Date para las horas de negocio inicio y fin
       const businessHoursStart =
         businessHours && businessHours.startTime
-          ? parseInt(businessHours.startTime.split(":")[0], 10)
-          : 0;
+          ? new Date(
+              selectInfo.startStr.split("T")[0] + "T" + businessHours.startTime
+            )
+          : new Date(selectInfo.startStr);
+
       const businessHoursEnd =
         businessHours && businessHours.endTime
-          ? parseInt(businessHours.endTime.split(":")[0], 10)
-          : 24;
+          ? new Date(
+              selectInfo.endStr.split("T")[0] + "T" + businessHours.endTime
+            )
+          : new Date(selectInfo.endStr);
 
-      const startHour = startTime.getHours();
-      const endHour = endTime.getHours();
+      // Verificar si el horario seleccionado está dentro de las horas de negocio
+      const isStartTimeWithinBusinessHours = startTime >= businessHoursStart;
+      const isEndTimeWithinBusinessHours = endTime <= businessHoursEnd;
 
-      const isWithinBusinessHours =
-        startHour >= businessHoursStart &&
-        endHour <= businessHoursEnd &&
-        endHour > startHour;
-      const nonWorkingDays = businessHours?.daysOfWeek;
-      const selectedDay = new Date(selectInfo.start).getDay();
-
-      if (!isWithinBusinessHours) {
+      if (!isStartTimeWithinBusinessHours || !isEndTimeWithinBusinessHours) {
         alert(
-          `El Profesional solo opera desde las ${businessHours?.startTime} hasta las ${businessHours?.endTime}`
+          `El Profesional solo opera desde las ${businessHours?.startTime} hasta las ${businessHours?.endTime}. Por favor, selecciona un horario dentro de este rango.`
         );
-        calendarApi.unselect();
+        calendarApi.unselect(); // Deshace la selección actual
         return;
       }
+
+      // Verificar los días no laborables
+      const nonWorkingDays = businessHours?.daysOfWeek;
+      const selectedDay = startTime.getDay(); // Obtiene el día de la semana de la fecha seleccionada
+
       if (nonWorkingDays && !nonWorkingDays.includes(selectedDay)) {
         alert("La selección está fuera de los días laborables.");
         calendarApi.unselect();

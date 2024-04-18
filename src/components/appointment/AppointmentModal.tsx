@@ -32,6 +32,8 @@ export default function AppointmentModal({
   const [endTime, setEndTime] = useState(formattedEndTime);
   const id = useParams().id as string;
   let appointmentData: Appointment;
+  const businessHours = useAppSelector((state) => state.businessHours);
+  console.log(businessHours);
 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
@@ -41,11 +43,71 @@ export default function AppointmentModal({
     setMessage(e.target.value);
   };
   const handleStartTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setStartTime(e.target.value);
+    const selectedTime = e.target.value;
+    const selectedDateTime = new Date(selectedDate);
+    selectedDateTime.setHours(
+      parseInt(selectedTime.split(":")[0]),
+      parseInt(selectedTime.split(":")[1])
+    );
+
+    const businessStartDateTime = new Date(selectedDate);
+    businessStartDateTime.setHours(
+      parseInt(businessHours.startTime.split(":")[0]),
+      parseInt(businessHours.startTime.split(":")[1])
+    );
+
+    const businessEndDateTime = new Date(selectedDate);
+    businessEndDateTime.setHours(
+      parseInt(businessHours.endTime.split(":")[0]),
+      parseInt(businessHours.endTime.split(":")[1])
+    );
+
+    if (
+      selectedDateTime < businessStartDateTime ||
+      selectedDateTime >= businessEndDateTime
+    ) {
+      alert(
+        `Por favor, selecciona un horario de inicio dentro del horario de negocio: ${businessHours.startTime} a ${businessHours.endTime}.`
+      );
+      // Opcional: ajustar el valor a un límite permitido
+      // setStartTime(businessHours.startTime);
+    } else {
+      setStartTime(selectedTime);
+    }
   };
 
   const handleEndTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEndTime(e.target.value);
+    const selectedTime = e.target.value;
+    const selectedDateTime = new Date(selectedDate);
+    selectedDateTime.setHours(
+      parseInt(selectedTime.split(":")[0]),
+      parseInt(selectedTime.split(":")[1])
+    );
+
+    const startDateTime = new Date(selectedDate);
+    startDateTime.setHours(
+      parseInt(startTime.split(":")[0]),
+      parseInt(startTime.split(":")[1])
+    );
+
+    const businessEndDateTime = new Date(selectedDate);
+    businessEndDateTime.setHours(
+      parseInt(businessHours.endTime.split(":")[0]),
+      parseInt(businessHours.endTime.split(":")[1])
+    );
+
+    if (
+      selectedDateTime <= startDateTime ||
+      selectedDateTime > businessEndDateTime
+    ) {
+      alert(
+        `Por favor, selecciona un horario de finalización después del inicio y dentro del horario de negocio: ${businessHours.startTime} a ${businessHours.endTime}.`
+      );
+      // Opcional: ajustar el valor a un límite permitido
+      // setEndTime(businessHours.endTime);
+    } else {
+      setEndTime(selectedTime);
+    }
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -93,7 +155,7 @@ export default function AppointmentModal({
           userInformation._id
         );
         if (appointmentResponse.data) {
-          dispatch(setAppointments(appointmentResponse.data)); // Asegúrate de que esta es la acción correcta para actualizar las citas en tu slice de Redux
+          dispatch(setAppointments(appointmentResponse.data));
         }
 
         console.log("Cita actualizada exitosamente:", response.data);
@@ -105,7 +167,7 @@ export default function AppointmentModal({
           userInformation._id
         );
         if (appointmentResponse.data) {
-          dispatch(setAppointments(appointmentResponse.data)); // Asegúrate de que esta es la acción correcta para actualizar las citas en tu slice de Redux
+          dispatch(setAppointments(appointmentResponse.data));
         }
       }
       alert(response.data.message);
@@ -141,13 +203,15 @@ export default function AppointmentModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-gray-700 p-5 rounded-lg ">
         <h2 className="text-xl font-bold text-white text-center">
-          Bloquea tus horarios
+          {userInformation.role === "professional"
+            ? "Bloquea tus horarios"
+            : "Crea una cita"}
         </h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label
               htmlFor="day"
-              className="flex flex-col text-white text-sm font-bold my-2 gap-2 "
+              className="flex flex-col text-white text-sm font-bold my-2 gap-2"
             >
               Día
               <DatePicker
@@ -193,16 +257,25 @@ export default function AppointmentModal({
               className="w-full p-2 rounded-md bg-gray-800 text-white"
               style={{ resize: "none", height: "6rem" }}
               maxLength={300}
-              placeholder="Ingresa un mensaje para tus clientes (máx. 300 caracteres)"
+              placeholder={
+                userInformation.role === "professional"
+                  ? "Ingresa un mensaje para tus clientes (máx. 300 caracteres)"
+                  : "Ingresa tus preguntas o detalles sobre la cita (máx. 300 caracteres)"
+              }
             ></textarea>
           </div>
-
           <div className="flex justify-between items-center">
             <button
               type="submit"
               className={`btn-primary ${appointmentId ? "w-2/3" : "w-full"}`}
             >
-              {appointmentId ? "Modificar bloqueo" : "Confirmar bloqueo"}
+              {appointmentId
+                ? userInformation.role === "professional"
+                  ? "Modificar bloqueo"
+                  : "Modificar cita"
+                : userInformation.role === "professional"
+                ? "Confirmar bloqueo"
+                : "Confirmar cita"}
             </button>
             {appointmentId && (
               <button
@@ -215,9 +288,7 @@ export default function AppointmentModal({
             <button
               type="button"
               className="btn-secondary ml-2"
-              onClick={() => {
-                setIsModalOpen(false);
-              }}
+              onClick={() => setIsModalOpen(false)}
             >
               Cancelar
             </button>

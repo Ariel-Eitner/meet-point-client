@@ -15,6 +15,8 @@ export default function ProtectRoute() {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
+  console.log(user);
+
   useEffect(() => {
     if (!isLoading && user?.email) {
       userService

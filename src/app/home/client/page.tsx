@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { userService } from "@/services/userService";
 import Link from "next/link";
 import Image from "next/image";
+import { capitalizeText, capitalizeWords } from "@/utils/utils";
 
 export default function ClientPage() {
   const [users, setUsers] = useState([]);
@@ -37,19 +38,47 @@ export default function ClientPage() {
               key={user.email}
             >
               <Image
-                src={user.photoUrl}
+                src={user.photoUrl || "/default-profile.png"} // Asumiendo que tienes una imagen por defecto.
                 width={100}
                 height={100}
                 alt="profesional"
               />
-              <h3 className="text-lg font-bold text-black">{user.name}</h3>
-              <p className="text-black">Email: {user.email}</p>
-              <p className="text-black">Rol: {user.role}</p>
-              {user.phone && (
-                <p className="text-black">Teléfono: {user.phone}</p>
-              )}
+              <h3 className="text-lg font-bold text-black">
+                {capitalizeText(user.firstName)}{" "}
+                {capitalizeWords(user.lastName)}
+              </h3>
+              {/* <p className="text-black">Email: {user.email}</p> */}
+              {/* <p className="text-black">Rol: {user.role}</p> */}
+              {/* {user.phoneNumber && (
+                <p className="text-black">Teléfono: {user.phoneNumber}</p>
+              )} */}
               {user.country && (
-                <p className="text-black">País: {user.country}</p>
+                <p className="text-black">
+                  País: {capitalizeText(user.country)}
+                </p>
+              )}
+              {user.bio && (
+                <p className="text-black">Bio: {capitalizeText(user.bio)}</p>
+              )}
+              {user.experience && (
+                <p className="text-black">
+                  Experiencia: {user.experience} Años
+                </p>
+              )}
+              {user.field && (
+                <p className="text-black">
+                  Campo: {capitalizeText(user.field)}
+                </p>
+              )}
+              {user.specialty && (
+                <p className="text-black">
+                  Especialidad: {capitalizeText(user.specialty)}
+                </p>
+              )}
+              {user.studies && (
+                <p className="text-black">
+                  Estudios: {capitalizeText(user.studies)}
+                </p>
               )}
             </Link>
           ))}
