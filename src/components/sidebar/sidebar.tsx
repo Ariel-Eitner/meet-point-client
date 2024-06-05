@@ -164,7 +164,7 @@ export default function SideBar() {
                 transform="translate(-107 -152)"
               />
             </svg>
-            Mis Citas
+            Mis Citas 12
           </Link>
         </>
       );
